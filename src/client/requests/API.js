@@ -1,10 +1,10 @@
 // totally not stolen from discord.js :sunglasses:
 const other = [
-	"toString",
-	"valueOf",
-	"constructor", 
-	"inspect",
-	Symbol.toPrimitive
+  "toString",
+  "valueOf",
+  "constructor", 
+  "inspect",
+  Symbol.toPrimitive
 ],
 methods = [
 	"get",
@@ -18,7 +18,7 @@ module.exports = function createRoute(requests) {
   const route = [""]
   const handler = {
     get(_, name) {
-			if (other.includes(name)) return () => route.join("/")
+      if (other.includes(name)) return () => route.join("/")
 			
       if (methods.includes(name)) return (options) => requests.request(name, route.join("/"), options)
 			
