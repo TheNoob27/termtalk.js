@@ -28,8 +28,8 @@ module.exports = function createRoute(requests) {
     apply(_t, _, args) {
       route.push(...args.filter((x) => x != null))
       return p(handler)
-    },
-  };
+    }
+  }
   return p(handler)
 }
 
