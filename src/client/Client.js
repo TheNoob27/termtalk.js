@@ -1,4 +1,6 @@
 const Requests = require("./requests/Requests.js")
+const { TypeError } = require("../errors")
+const Server = require("../structures/Server.js")
 
 class Client {
   constructor(options) {
@@ -10,16 +12,32 @@ class Client {
     return this.requests
   }
   
-  parseOptions(options) {
+  get token() {
+    return this.servers.size === 1 ? this.servers.cache.first().token : null
+  }
+  
+  get tokens() {
+    return this.servers.cache.map(s => s.token)
+  }
+  
+  parseOptions(data) {
     const defaultOptions = {
       ip: "localhost", 
-      port: 3000,
-      token: null
+      port: 3000
+    },
+    options = {}
+    
+    if (!data || typeof data !== "object") return defaultOptions
+    
+    if ("ip" in data && (typeof data.ip !== "string" && !(data.ip instanceof Array) || data.ip.length <= 1)) throw new TypeError("OPTIONS_INVALID")
+    if ("port" in data && (typeof data.port !== "number" || isNaN(options.port))) throw new TypeError("OPTIONS_INVALID")
+    
+    for (const k of Object.keys(defaultOptions)) {
+      options[k] = data[k] || defaultOptions[k]
     }
     
-    if (!options || typeof options !== "object") return defaultOptions
-    
-    if ("ip" in options && typeof options.ip !== "string") throw new TypeError("The IP must be a string.")
-    if ("port" in options && (typeof options.port !== "number" || isNaN(options.port)) throw new TypeError("The port must be a number.")
+    return options
   }
 }
+
+module.exports = Client
