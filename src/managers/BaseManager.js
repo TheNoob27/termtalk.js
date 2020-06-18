@@ -20,6 +20,13 @@ class BaseManager {
     if (cache) this.cache.set(id || entry.id, entry)
     return entry
   }
+  
+  resolve(data = {}) {
+    if (data instanceof this.dataType) return data
+    if (typeof data === "string") return this.cache.get(data) || null
+    
+    return null
+  }
 }
 
 module.exports = BaseManager
