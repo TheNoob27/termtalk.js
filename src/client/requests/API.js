@@ -7,10 +7,10 @@ const other = [
   Symbol.toPrimitive
 ],
 methods = [
-	"get",
-	"create",
-	"post",
-	"delete" // and more i think lol
+  "get",
+  "put",
+  "post",
+  "delete" // and more i think lol
 ]
 
 const blank = () => {}
