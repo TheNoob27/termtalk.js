@@ -1,3 +1,4 @@
+const EventEmitter = require("events")
 const RequestsManager = require("./requests/RequestsManager.js")
 const { Error, TypeError, RangeError } = require("../errors")
 const Server = require("../structures/Server.js")
@@ -5,7 +6,7 @@ const ServerManager = require("../managers/ServerManager.js")
 const UserManager = require("../managers/UserManager.js")
 const Collection = require("../util/Collection.js")
 
-class Client {
+class Client extends EventEmitter {
   constructor(options) {
     this.http = require("http") // default http
     this.options = this.parseOptions(options)
@@ -61,7 +62,11 @@ class Client {
       }
     }
     
-    return channels
+    return {
+      client: this,
+      cache: channels 
+    }
+    // to be similar to every other manager
   }
   
   create({ id, username, tag, uid: _, ownerID, ownerUid, ownerPassword, ip, port } = {}) {
@@ -84,6 +89,13 @@ class Client {
       if (!this.options.ip || typeof this.options.ip === "string") this.options.ip = ip
       if (!this.options.port || typeof this.options.port === "number") this.options.port = port
       
+      this.users.add({ 
+        uid: id, 
+        username, tag, 
+        bot: true,
+        ownerUid, ownerPassword
+        id // yes its uid but it'll be _patched later
+      })
       return this.servers.add({ ip, port, token })
     })
   }
