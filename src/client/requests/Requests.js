@@ -13,7 +13,7 @@ class RequestsManager {
     return this.request
   }
 
-  request(data, options) {
+  request(data = {}, options) {
     Object.assign(data, {
       headers: {
         Authorization: `Bot ${this.client.token}`,
@@ -21,8 +21,8 @@ class RequestsManager {
       }
     })
     
-    Object.assign(options, {
-      sessionID: data.server ? data.server.session : this.client.user.session // prob not gonna work but eh lol
+    if (data.server && data.server.session || this.client.user.session) Object.assign(options, {
+      sessionID: data.server && data.server.session || this.client.user.session // prob not gonna work (user session) but eh lol their fault
     })
     
     if (options && typeof options === "object") { 
