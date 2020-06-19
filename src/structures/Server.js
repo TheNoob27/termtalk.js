@@ -6,6 +6,7 @@ class Server extends Base {
   constructor(client, data) {
     super(client)
     
+    this.id = client.servers.cache.size
     this.members = new MemberManager(this)
     this.channels = new ChannelManager(this)
     
@@ -38,10 +39,6 @@ class Server extends Base {
 
   get secure() {
     return this.ip.startsWith("https")
-  }
-  
-  get id() {
-    return this.ip
   }
   
   get name() {
