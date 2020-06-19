@@ -28,7 +28,7 @@ module.exports = function createRoute(manager) {
           return p(handler)
         }
 
-        return (options) => manager.request(name, {
+        return (options) => manager.request({
           path: route.join("/"),
           method: name.toUpperCase(),
           hostname: route.server ? route.server.slice(route.server.startsWith("https") ? 8 : 7) : null,
