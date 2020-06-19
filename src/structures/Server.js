@@ -30,7 +30,7 @@ class Server extends Base {
     
     if (data.members) {
       this.members.cache.clear()
-      for (const member of data.members) this.members.add(member)
+      for (const member of data.members) this.members.add(member, { extras: [this] })
     }
   }
   
