@@ -18,6 +18,14 @@ class Server extends Base {
     if (data) this._patch(data)
   }
   
+  get sessionID() {
+    return this.clientMember && this.clientMember.user.sessionID
+  }
+  
+  get ready() {
+    return this.readyAt != null
+  }
+  
   _patch(data) {
     if (data.token) Object.defineProperty(this, "token", { value: data.token, writable: true })
     if (typeof data.ip === "string") this.ip = data.ip.startsWith("http") ? data.ip : `http://${data.ip}`
@@ -74,8 +82,12 @@ class Server extends Base {
             return reject(d)
           }
         
-          const member = this.members.add(d.bot)
-          await this.fetch().then(resolve).catch(reject)
+          d.bot.bot = true
+          this.clientMember = this.members.add(d.bot)
+          await this.fetch().then(() => {
+            this.readyAt = Date.now()
+            if (this.client.guilds.cache.every(g => g.ready)) this.client.emit("ready")
+          }).then(resolve).catch(reject)
         })
       }).catch(e => {
         if (deleteReject) this.client.servers.cache.delete(this.id)
