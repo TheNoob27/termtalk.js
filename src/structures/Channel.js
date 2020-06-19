@@ -26,7 +26,7 @@ class Channel extends Base {
         ...this.client.user.json,
         msg
       })
-      .then(message => this.messages.add(message, { extras: [this] }))
+      .then(message => this.messages.add(message))
   }
 }
 
