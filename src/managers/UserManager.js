@@ -2,9 +2,9 @@ const BaseManager = require("./BaseManager.js")
 const User = require("../structures/User.js")
 
 class UserManager extends BaseManager {
-  constructor(server) {
+  constructor(client) {
     super(client, User)
   }
 }
 
-module.exports = ChannelManager
+module.exports = UserManager
