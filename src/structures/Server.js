@@ -28,7 +28,11 @@ class Server extends Base {
   
   _patch(data) {
     if (data.token) Object.defineProperty(this, "token", { value: data.token, writable: true })
-    if (typeof data.ip === "string") this.ip = data.ip.startsWith("http") ? data.ip : `http://${data.ip}`
+    if (typeof data.ip === "string") {
+      this.ip = data.ip.startsWith("http") ? data.ip : `http://${data.ip}`
+      this.http = this.secure ? require("https") : require("http")
+    }
+    
     if (data.port) this.port = data.port
 
     if (data.channels) {

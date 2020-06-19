@@ -4,6 +4,7 @@
 	"description": "TermTalk bot library with a very original name.",
 	"main": "src/index.js",
 	"dependencies": {
-		"@discordjs/collection": "^0.1.5"
+		"@discordjs/collection": "^0.1.5",
+		"socket.io-client": "^2.3.0"
 	}
 }

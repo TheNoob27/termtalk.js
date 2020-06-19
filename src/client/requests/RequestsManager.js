@@ -31,7 +31,7 @@ class RequestsManager {
     }
     
     return new Promise((resolve, reject) => {
-      const http = data.server ? data.server.http : this.client.http
+      const http = data.server ? data.server.http || this.client.http : this.client.http
       
       const request = http.request(data, res => {
         const status = res.statusCode
