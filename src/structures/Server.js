@@ -112,3 +112,5 @@ class Server extends Base {
     return this.client.api.server(this)
   }
 }
+
+module.exports = Server
