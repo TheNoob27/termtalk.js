@@ -17,8 +17,40 @@ class RequestsManager {
     Object.assign(data, {
       headers: {
         Authorization: `Bot ${this.client.token}`,
-       "Content-Type": "application/x-www-form-urlencoded"
+       "Content-Type": data.method !== "GET" ? "application/json" : "application/x-www-form-urlencoded" 
       }
+    })
+    
+    Object.assign(options, {
+      sessionID: data.server ? data.server.session : this.client.user.session // prob not gonna work but eh lol
+    })
+    
+    if (options && typeof options === "object") { 
+      if (data.method === "GET") data.path += this._stringifyOptions(options)
+      else options = JSON.stringify(options)
+    }
+    
+    return new Promise((resolve, reject) => {
+      const http = data.server ? data.server.http : this.client.http
+      
+      const request = http.request(data, res => {
+        const status = res.statusCode
+
+        let data = ""
+        res.setEncoding('utf8')
+        res.on('data', (chunk) => data += chunk)
+        res.on('end', () => {
+          if (res.headers["content-type"] === "application/json") data = JSON.parse(data)
+          
+          if (status < 200 || status >= 300) reject(data)
+          else resolve(data)
+        })
+      })
+
+      request.on("error", reject)
+
+      if (data.method === "POST") request.write(options)
+      request.end()
     })
   }
   
