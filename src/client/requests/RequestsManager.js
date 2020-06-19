@@ -21,8 +21,8 @@ class RequestsManager {
       }
     })
     
-    if (data.server && data.server.session || this.client.user.session) Object.assign(options, {
-      sessionID: data.server && data.server.session || this.client.user.session // prob not gonna work (user session) but eh lol their fault
+    if (data.server && data.server.sessionID || this.client.sessionID) Object.assign(options, {
+      sessionID: data.server && data.server.sessionID || this.client.sessionID // prob not gonna work (user session) but eh lol their fault
     })
     
     if (options && typeof options === "object") { 
