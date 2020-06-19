@@ -18,7 +18,14 @@ class Member extends Base {
   send(msg) {
     if (typeof msg !== "string") return Promise.reject(new Error("MESSAGE_TYPE"))
     
-    return this.server.api.members[this.id].messages.post({ ...this.user.json, msg })
+    return this
+      .server.api
+      .members(this.id)
+      .messages
+      .post({
+        ...(this.server.clientMember ? this.server.clientMember.user.json : this.client.user.json),
+        msg
+      })
   }
 }
 
