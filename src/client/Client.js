@@ -73,7 +73,7 @@ class Client {
     
     const server = this.servers.add({ ip, port }, { cache: false })
     
-    return this.api.server(server).bots.create.get({
+    return this.api.server(server).bots.create.post({
       ownerUid: ownerID,
       ownerPassword: ownerPassword,
       uid: id,
