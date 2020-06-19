@@ -3,6 +3,7 @@ const { Error, TypeError, RangeError } = require("../errors")
 const Server = require("../structures/Server.js")
 const ServerManager = require("../managers/ServerManager.js")
 const UserManager = require("../managers/UserManager.js")
+const Collection = require("../util/Collection.js")
 
 class Client {
   constructor(options) {
@@ -13,6 +14,7 @@ class Client {
     this.servers = new ServerManager(this, [
       this.options.ip.map((ip, i) => ({ ip, port: this.options.port[i] }))
     ])
+    this.users = new UserManager(this)
   }
   
   get api() {
@@ -35,6 +37,33 @@ class Client {
     return this.servers.cache.size === 1 ? this.servers.cache.first() : null
   }
   
+  get sessionID() {
+    return this.servers.cache.size === 1 ? this.servers.cache.first().sessionID : null
+  }
+  
+  get user() {
+    return this.servers.cache.find(s => s.clientMember && s.clientMember.user)
+  }
+  
+  get channels() {
+    const channels = new Collection()
+    const single = this.servers.cache.size === 1
+    for (const server of this.servers.cache.values()) {
+      for (const [name, channel] of server.channels.cache.keys()) {
+        if (!single && (name === "General" || channels.has(name))) {
+          channels.set(`${name}_${server.id}`, channel)
+          if (channels.has(name)) {
+            let old = channels.get(name)
+            channels.set(`${name}_${old.server.id}`, old)
+            channels.delete(name)
+          }
+        } else channels.set(name, channel)
+      }
+    }
+    
+    return channels
+  }
+  
   create({ id, username, tag, uid: _, ownerID, ownerUid, ownerPassword, ip, port } = {}) {
     if (_ && !id) id = _
     if (ownerUid && !ownerID) ownerID = ownerUid
@@ -51,7 +80,7 @@ class Client {
       uid: id,
       username,
       tag
-    }).then(({ token }) => {
+    }).then(({ token } = {}) => {
       if (!this.options.ip || typeof this.options.ip === "string") this.options.ip = ip
       if (!this.options.port || typeof this.options.port === "number") this.options.port = port
       
