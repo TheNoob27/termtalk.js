@@ -10,9 +10,9 @@ methods = [
   "server", // set the server you want to make requests on
   "servers", // idk im lazy
   "get",
-  "put",
+ // "put",
   "post",
-  "delete" // and more i think lol
+ // "delete" // only 2 methods currently lol
 ]
 
 const Server = require("../../structures/Server.js")
