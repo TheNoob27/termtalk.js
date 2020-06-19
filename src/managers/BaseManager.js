@@ -1,13 +1,13 @@
 const Collection = require("../util/Collection.js")
 
 class BaseManager {
-  constructor(client, dataType, data, iterable) {
+  constructor(client, dataType, data, Cache = Collection, ...options) {
     Object.defineProperties(this, {
       client: { value: client },
       dataType: { value: dataType }
     })
     
-    this.cache = new Collection(iterable)
+    this.cache = new Cache(...options)
     if (data) for (const d of data) this.add(d)
   }
   
