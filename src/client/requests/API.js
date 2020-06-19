@@ -15,6 +15,8 @@ methods = [
   "delete" // and more i think lol
 ]
 
+const Server = require("../../structures/Server.js")
+
 const blank = () => {}
 module.exports = function createRoute(manager) {
   const route = [""]
@@ -24,19 +26,19 @@ module.exports = function createRoute(manager) {
 			
       if (methods.includes(name)) {
         if (name.includes("server")) return (server) => {
-          route.server = server.startsWith("http") ? server : `http://${server}`)
+          if (server instanceof Server) route.server = server
+          else if (typeof server === "string") {
+            let s = manager.client.servers.cache.get(server.startsWith("http") ? server : `http://${server}`)
+            if (s) route.server = s
+          }
           return p(handler)
         }
 
         return (options) => manager.request({
           path: route.join("/"),
           method: name.toUpperCase(),
-          hostname: route.server ? route.server.slice(route.server.startsWith("https") ? 8 : 7) : null,
-          port: route.server ? 
-            route.server.includes(":") ? 
-              route.server.split(":")[1] : 
-              (manager.client.servers.cache.get(route.server) || {port: 3000}).port :
-            3000,
+          hostname: route.server ? route.server.name.slice(route.server.secure ? 8 : 7) || null : null,
+          port: route.server ? route.server.port || 3000 : 3000,
           server: route.server
         }, options)
       }
