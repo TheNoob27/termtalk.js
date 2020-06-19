@@ -38,7 +38,7 @@ class Server extends Base {
     
     if (data.members) {
       this.members.cache.clear()
-      for (const member of data.members) this.members.add(member, { extras: [this] })
+      for (const member of data.members) this.members.add(member)
     }
   }
   
@@ -84,9 +84,11 @@ class Server extends Base {
         
           d.bot.bot = true
           this.clientMember = this.members.add(d.bot)
-          await this.fetch().then(() => {
-            this.readyAt = Date.now()
-            if (this.client.guilds.cache.every(g => g.ready)) this.client.emit("ready")
+          await this.fetch().then(d => {
+            this.load()
+            .readyAt = Date.now()
+            if (this.client.servers.cache.every(g => g.ready)) this.client.emit("ready")
+            return d
           }).then(resolve).catch(reject)
         })
       }).catch(e => {
@@ -105,7 +107,24 @@ class Server extends Base {
       members: await this.api.members.get()
     }
     
-    return this._patch(data)
+    this._patch(data)
+    return this
+  }
+   
+  load() {
+    if (this.ready || !this.socket) return false
+    
+    this.socket.on("memberConnect", ({ data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
+    this.socket.on("memberDisconnect", ({ data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
+    
+    this.socket.on("msg", data => {
+      const channel = this.channels.add({ name: data.channel })
+      data.channel = channel
+      return this.client.emit("message", channel.messages.add(data))
+    })
+    
+    // oh thats it?
+    return this
   }
 
   get host() {
@@ -122,6 +141,10 @@ class Server extends Base {
 
   get api() {
     return this.client.api.server(this)
+  }
+  
+  toString() {
+    return this.host
   }
 }
 
