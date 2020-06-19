@@ -27,7 +27,13 @@ class User extends Base {
     if (!server) return Promise.reject(new Error("USER_DM"))
     if (typeof msg !== "string") return Promise.reject(new Error("MESSAGE_TYPE"))
     
-    return server.api.members[this.id].messages.post({ ...this.json, msg })
+    return server.api
+      .members(this.id)
+      .messages
+      .post({ 
+        ...this.client.user.json, 
+        msg 
+      })
   }
   
   get json() {
