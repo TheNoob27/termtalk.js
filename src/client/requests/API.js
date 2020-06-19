@@ -36,7 +36,8 @@ module.exports = function createRoute(manager) {
             route.server.includes(":") ? 
               route.server.split(":")[1] : 
               (manager.client.servers.cache.get(route.server) || {port: 3000}).port :
-            3000
+            3000,
+          server: route.server
         }, options)
       }
 
