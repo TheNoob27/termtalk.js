@@ -9,6 +9,10 @@ class ChannelManager extends BaseManager {
     this.server = server
   }
   
+  add(data, { cache, id }) {
+    return super.add(data, { cache, id, extras: [this.server] })
+  }
+  
   resolve(data) {
     if (data instanceof Message) return super.resolve(data.channel)
     return super.resolve(data)
