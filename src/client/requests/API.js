@@ -16,7 +16,7 @@ methods = [
 ]
 
 const blank = () => {}
-module.exports = function createRoute(requests) {
+module.exports = function createRoute(manager) {
   const route = [""]
   const handler = {
     get(_, name) {
@@ -24,15 +24,20 @@ module.exports = function createRoute(requests) {
 			
       if (methods.includes(name)) {
         if (name.includes("server")) return (server) => {
-          route.unshift(server.startsWith("http") ? server : `http://${server}`)
+          route.server = server.startsWith("http") ? server : `http://${server}`)
           return p(handler)
         }
 
-        return (options) => requests.request(
-          name, route.join("/"), Object.assign(options, {
-            server: route[0].includes("http") ? route[0] : null
-          })
-        )
+        return (options) => manager.request(name, {
+          path: route.join("/"),
+          method: name.toUpperCase(),
+          hostname: route.server ? route.server.slice(route.server.startsWith("https") ? 8 : 7) : null,
+          port: route.server ? 
+            route.server.includes(":") ? 
+              route.server.split(":")[1] : 
+              (manager.client.servers.cache.get(route.server) || {port: 3000}).port :
+            3000
+        }, options)
       }
 
       route.push(name)
