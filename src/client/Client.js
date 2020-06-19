@@ -114,7 +114,8 @@ class Client extends EventEmitter {
   parseOptions(data) {
     const defaultOptions = {
       ip: "localhost", // lol ik you cant but thats their fault
-      port: 3000 // random port
+      port: 3000, // random port
+      messageCacheSize: 30
       // idk more options soon
     },
     options = {}
@@ -132,8 +133,10 @@ class Client extends EventEmitter {
       port: [data.port]
     })
     
+    if ("messageCacheSize" && typeof options.messageCacheSize !== "number") throw new TypeError("OPTIONS_INVALID")
+    
     for (const k of Object.keys(defaultOptions)) {
-      options[k] = data[k] || defaultOptions[k]
+      options[k] = data[k] == null ? defaultOptions[k] : data[k]
     }
     
     return options
