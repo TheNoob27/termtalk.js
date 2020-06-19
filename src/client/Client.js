@@ -35,6 +35,41 @@ class Client {
     return this.servers.cache.size === 1 ? this.servers.cache.first() : null
   }
   
+  create({ id, username, tag, uid: _, ownerID, ownerUid, ownerPassword, ip, port } = {}) {
+    if (_ && !id) id = _
+    if (ownerUid && !ownerID) ownerID = ownerUid
+    const data = [id, username, tag, ownerID, ownerPassword, ip, port]
+    
+    if (data.some(i => !i)) return Promise.reject(new Error("BOT_CREATE_INFO"))
+    if (data.slice(0, -1).some(i => typeof i !== "string") || typeof port !== "number") return Promise.reject(new TypeError("BOT_CREATE_TYPE"))
+    
+    const server = this.servers.add({ ip, port }, { cache: false })
+    
+    return this.api.server(server).bots.create.post({
+      ownerUid: ownerID,
+      ownerPassword: ownerPassword,
+      uid: id,
+      username,
+      tag
+    }).then(({ token }) => {
+      if (!this.options.ip || typeof this.options.ip === "string") this.options.ip = ip
+      if (!this.options.port || typeof this.options.port === "number") this.options.port = port
+      
+      return this.servers.add({ ip, port, token })
+    })
+  }
+  
+  login({ ip, port, token }) {
+    const server = this.servers.cache.find(s => s.token === token)
+    if (!server && !(ip || port)) return Promise.reject(new Error("INVALID_TOKEN"))
+    if (!server) server = this.servers.cache.find(s => s.ip === ip)
+    if (server) return server.login()
+    
+    if (!ip || !port || !token) return Promise.reject(new Error("OPTIONS_INVALID"))
+    server = this.servers.add({ ip, port, token })
+    return server.login(true)
+  }
+  
   parseOptions(data) {
     const defaultOptions = {
       ip: "localhost", // lol ik you cant but thats their fault
@@ -63,29 +98,6 @@ class Client {
     return options
   }
   
-  create({ id, username, tag, uid: _, ownerID, ownerUid, ownerPassword, ip, port } = {}, options) {
-    if (_ && !id) id = _
-    if (ownerUid && !ownerID) ownerID = ownerUid
-    const data = [id, username, tag, ownerID, ownerPassword, ip, port]
-    
-    if (data.some(i => !i)) throw new Error("BOT_CREATE_INFO")
-    if (data.slice(0, -1).some(i => typeof i !== "string") || typeof port !== "number") throw new TypeError("BOT_CREATE_TYPE")
-    
-    const server = this.servers.add({ ip, port }, { cache: false })
-    
-    return this.api.server(server).bots.create.post({
-      ownerUid: ownerID,
-      ownerPassword: ownerPassword,
-      uid: id,
-      username,
-      tag
-    }).then(data => {
-      if (!this.options.ip || typeof this.options.ip === "string") this.options.ip = ip
-      if (!this.options.port || typeof this.options.port === "number") this.options.port = port
-      this.servers.add({ ip, port})
-      return data
-    })
-  }
 }
 
 module.exports = Client
