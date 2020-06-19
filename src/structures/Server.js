@@ -46,6 +46,6 @@ class Server extends Base {
   }
 
   get api() {
-    return this.client.api.server(this.ip)
+    return this.client.api.server(this)
   }
 }
