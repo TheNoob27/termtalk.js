@@ -8,6 +8,10 @@ class MemberManager extends BaseManager {
     this.server = server
   }
   
+  add(data, { cache, id }) {
+    return super.add(data, { cache, id, extras: [this.server] })
+  }
+  
   get guild() {
     return this.server
   }
