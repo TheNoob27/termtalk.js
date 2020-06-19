@@ -16,7 +16,6 @@ class User extends Base {
     if (data.bot) this.bot = Boolean(data.bot)
     
     if (data.sessionID) this.sessionID = data.sessionID
-    if (data.server) this.server = data.server
   }
   
   get tag() {
@@ -24,7 +23,7 @@ class User extends Base {
   }
   
   send(msg) {
-    let server = this.server || this.client.servers.cache.find(s => s.members.cache.has(this.id))
+    let server = this.client.servers.cache.find(s => s.members.cache.has(this.id))
     if (!server) return Promise.reject(new Error("USER_DM"))
     if (typeof msg !== "string") return Promise.reject(new Error("MESSAGE_TYPE"))
     
