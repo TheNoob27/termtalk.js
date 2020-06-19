@@ -31,7 +31,7 @@ class User extends Base {
       .members(this.id)
       .messages
       .post({ 
-        ...this.client.user.json, 
+        ...(server.me ? server.me.user.json : this.client.user.json), 
         msg 
       })
   }

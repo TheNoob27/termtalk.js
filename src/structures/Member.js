@@ -9,6 +9,10 @@ class Member extends Base {
     if (data) this._patch(data)
   }
   
+  get id() {
+    return this.user.id
+  }
+  
   _patch(data) {
     this.admin = Boolean(data.admin)
     this.user = this.client.users.add(data)
@@ -23,7 +27,7 @@ class Member extends Base {
       .members(this.id)
       .messages
       .post({
-        ...(this.server.clientMember ? this.server.clientMember.user.json : this.client.user.json),
+        ...(this.server.me ? this.server.me.user.json : this.client.user.json),
         msg
       })
   }

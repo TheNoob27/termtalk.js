@@ -69,7 +69,7 @@ class Client extends EventEmitter {
     // to be similar to every other manager
   }
   
-  create({ id, username, tag, uid: _, ownerID, ownerUid, ownerPassword, ip, port } = {}) {
+  create({ id, username, tag, uid: _, ownerID, ownerUid, ownerPassword, ip, port } = {}, autoLogin = false) {
     if (_ && !id) id = _
     if (ownerUid && !ownerID) ownerID = ownerUid
     const data = [id, username, tag, ownerID, ownerPassword, ip, port]
@@ -93,15 +93,21 @@ class Client extends EventEmitter {
         uid: id, 
         username, tag, 
         bot: true,
-        ownerUid, ownerPassword
+        ownerUid, ownerPassword,
         id // yes its uid but it'll be _patched later
       })
-      return this.servers.add({ ip, port, token })
+      
+      const server = this.servers.add({ ip, port, token })
+      if (autoLogin) return this.login({ token, server })
+      return server
     })
   }
   
-  login({ ip, port, token }) {
-    const server = this.servers.cache.find(s => s.token === token)
+  login(options) {
+    let { ip, port, token, server: s } = options || {}
+    if (typeof options === "string") token = options
+    
+    const server = s instanceof Server ? s : this.servers.cache.find(s => s.token === token)
     if (!server && !(ip || port)) return Promise.reject(new Error("INVALID_TOKEN"))
     if (!server) server = this.servers.cache.find(s => s.ip === ip)
     if (server) return server.login()
@@ -109,6 +115,10 @@ class Client extends EventEmitter {
     if (!ip || !port || !token) return Promise.reject(new Error("OPTIONS_INVALID"))
     server = this.servers.add({ ip, port, token })
     return server.login(true)
+  }
+
+  get connect() {
+    return this.login
   }
   
   parseOptions(data) {
@@ -133,7 +143,7 @@ class Client extends EventEmitter {
       port: [data.port]
     })
     
-    if ("messageCacheSize" && typeof options.messageCacheSize !== "number") throw new TypeError("OPTIONS_INVALID")
+    if ("messageCacheSize" in options.messageCacheSize && typeof options.messageCacheSize !== "number") throw new TypeError("OPTIONS_INVALID")
     
     for (const k of Object.keys(defaultOptions)) {
       options[k] = data[k] == null ? defaultOptions[k] : data[k]

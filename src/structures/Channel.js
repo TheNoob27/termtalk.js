@@ -14,6 +14,10 @@ class Channel extends Base {
   _patch(data) {
     this.name = data.name || "General"
   }
+
+  get id() {
+    return this.name
+  }
   
   send(msg) {
     if (typeof msg !== "string") return Promise.reject(new Error("MESSAGE_TYPE"))
@@ -23,7 +27,7 @@ class Channel extends Base {
       .channels(this.id)
       .messages
       .post({
-        ...this.client.user.json,
+        ...(this.server.me ? this.server.me.user.json : this.client.user.json),
         msg
       })
       .then(message => this.messages.add(message))

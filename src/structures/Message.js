@@ -1,13 +1,13 @@
 const Base = require("./Base.js")
 const { Error } = require("../errors")
-const Collection = require("../util/Collection.js")
+const MessageMentions = require("./MessageMentions.js")
 
 class Message extends Base {
   constructor(client, data, channel) {
     super(client)
     
     this.channel = channel
-    this.mentions = new Collection()
+    this.mentions = new MessageMentions(this)
     if (data) this._patch(data)
   }
   
@@ -23,18 +23,7 @@ class Message extends Base {
     })
     
     if (this.content) {
-      const mentionRegex = /@[^\s].+?#\d{4}/gi // /<@\d{10,20}>/ // can discrims have letters?
-      const matches = this.content.match(mentionRegex)
-      
-      if (matches) {
-        this.mentions.clear()
-        for (const ping of matches) {
-          const [username, discrim] = ping.substring(1).split("#")
-          if (!(username && discrim)) continue;
-          const user = this.server.members.find(m => m.user && m.user.username === username && m.user.discriminator === discrim)
-          if (user) this.mentions.set(user.id, user)
-        }
-      }
+      this.mentions.parse()
     }
   }
   

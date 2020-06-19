@@ -7,9 +7,10 @@ module.exports = {
   Base: require("./structures/Base.js"),
 	Channel: require("./structures/Channel.js"),
 	ClientUser: require("ClientUser.js"),
-	Member: require("./structures/Member.js"),
+  Member: require("./structures/Member.js"),
+  MessageMentions: require("./structures/MessageMentions.js"),
 	Server: require("./structures/Server.js"),
-	User: require("./structures/User.js"),
+  User: require("./structures/User.js"),
   
   BaseManager: require("./managers/BaseManager.js"),
   ChannelManager: require("./managers/ChannelManager.js"),

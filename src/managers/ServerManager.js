@@ -6,8 +6,8 @@ class ServerManager extends BaseManager {
     super(client, Server, servers)
   }
 
-  connect({ ip, port }) {
-    //
+  get connect() {
+    return this.client.login
   }
 }
 

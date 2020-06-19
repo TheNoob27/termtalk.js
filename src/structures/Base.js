@@ -8,7 +8,7 @@ class Base {
   _patch() {}
   
   valueOf() {
-    return this.id
+    return this.id != null ? this.id : super.valueOf()
   }
   
   toJSON(ignore) {

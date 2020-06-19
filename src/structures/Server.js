@@ -41,6 +41,10 @@ class Server extends Base {
       for (const member of data.members) this.members.add(member)
     }
   }
+
+  get me() {
+    return this.clientMember
+  }
   
   login(deleteReject = false) {
     const connect = new Promise((resolve, reject) => {

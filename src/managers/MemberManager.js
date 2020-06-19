@@ -15,6 +15,10 @@ class MemberManager extends BaseManager {
   get guild() {
     return this.server
   }
+
+  fetch() {
+    return this.server.api.members.get()
+  }
 }
 
 module.exports = MemberManager
