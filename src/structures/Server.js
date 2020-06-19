@@ -9,12 +9,14 @@ class Server extends Base {
     this.members = new MemberManager(this)
     this.channels = new ChannelManager(this)
     
-    if (data) this._patch(data) // lol probably not gonna ever be any data
+    if (data) this._patch(data)
   }
   
   _patch(data) {
     if (data.token) Object.defineProperty(this, "token", { value: data.token, writable: true })
-    
+    if (typeof data.ip === "string") this.ip = data.ip.startsWith("http") ? data.ip : `http://${data.ip}`
+    if (data.port) this.port = data.port
+
     if (data.channels) {
       this.channels.cache.clear()
       for (const channel of data.channels) this.channels.add(channel)
@@ -28,5 +30,25 @@ class Server extends Base {
   
   fetch() {
     // gonna do client requests soon
+  }
+
+  get host() {
+    return `${this.ip}:${this.port}`
+  }
+
+  get secure() {
+    return this.ip.startsWith("https")
+  }
+  
+  get id() {
+    return this.ip
+  }
+  
+  get name() {
+    return this.ip || ""
+  }
+
+  get api() {
+    return this.client.api.server(this.ip)
   }
 }

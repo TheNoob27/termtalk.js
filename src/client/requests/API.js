@@ -7,6 +7,8 @@ const other = [
   Symbol.toPrimitive
 ],
 methods = [
+  "server", // set the server you want to make requests on
+  "servers", // idk im lazy
   "get",
   "put",
   "post",
@@ -20,8 +22,19 @@ module.exports = function createRoute(requests) {
     get(_, name) {
       if (other.includes(name)) return () => route.join("/")
 			
-      if (methods.includes(name)) return (options) => requests.request(name, route.join("/"), options)
-			
+      if (methods.includes(name)) {
+        if (name.includes("server")) return (server) => {
+          route.unshift(server.startsWith("http") ? server : `http://${server}`)
+          return p(handler)
+        }
+
+        return (options) => requests.request(
+          name, route.join("/"), Object.assign(options, {
+            server: route[0].includes("http") ? route[0] : null
+          })
+        )
+      }
+
       route.push(name)
       return p(handler)
     },
