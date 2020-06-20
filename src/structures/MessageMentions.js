@@ -5,14 +5,14 @@ class MessageMentions {
     this.message = message
     this.users = new Collection()
     this.channels = new Collection()
-    if (this.message.content) this.parse()
+    //if (this.message.content) this.parse()
   }
 
   parse() {
     this.users.clear()
     this.channels.clear()
 
-    let matches = this.content.match(/@[^\s].+?#\d{4}/gi) // /<@\d{10,20}>/gi // can discrims have letters?
+    let matches = this.message.content.match(/@[^\s].+?#\d{4}/gi) // /<@\d{10,20}>/gi // can discrims have letters?
 
     if (matches) {
       for (const ping of matches) {
@@ -23,7 +23,7 @@ class MessageMentions {
       }
     }
 
-    matches = this.content.match(/#[^\s]+/gi)
+    matches = this.message.content.match(/#[^\s]+/gi)
 
     if (matches) {
       for (const channel of matches) {
