@@ -136,8 +136,8 @@ class Server extends Base {
     
     this.client.emit("debug", `Loading events for this server...`);
 
-    this.socket.on("memberConnect", ({ data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
-    this.socket.on("memberDisconnect", ({ data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
+    this.socket.on("memberConnect", ({ member: data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
+    this.socket.on("memberDisconnect", ({ member: data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
     
     this.socket.on("msg", data => {
       const channel = this.channels.add({ name: data.channel })
