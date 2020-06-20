@@ -28,7 +28,7 @@ class RequestsManager {
     })
     
     if (options && typeof options === "object") { 
-      if (data.method === "GET") data.path += this._stringifyOptions(options)
+      if (data.method === "GET") data.path += this._toQuery(options)
       else options = JSON.stringify(options)
     }
 
@@ -58,7 +58,7 @@ class RequestsManager {
     })
   }
   
-  _stringifyQuery(json) {
+  _toQuery(json) {
     if (!json || typeof json !== "object") return ""
     let str = "?"
     let f = s => encodeURIComponent(typeof s === "number" && isFinite(s) ? s : typeof s !== "number" ? s : "")
