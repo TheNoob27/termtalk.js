@@ -102,11 +102,6 @@ class Server extends Base {
           }).then(resolve).catch(reject)
         })
         
-        // login to the server
-        console.log({
-          bot: true, // what if i set to false :flushed:
-          token: this.token,
-        });
         this.socket.emit("login", {
           bot: true, // what if i set to false :flushed:
           token: this.token
@@ -139,7 +134,7 @@ class Server extends Base {
   load() {
     if (this.ready || !this.socket) return false
     
-    this.emit("debug", `Loading events for this server...`);
+    this.client.emit("debug", `Loading events for this server...`);
 
     this.socket.on("memberConnect", ({ data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
     this.socket.on("memberDisconnect", ({ data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
