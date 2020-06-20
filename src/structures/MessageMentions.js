@@ -26,8 +26,8 @@ class MessageMentions {
     matches = this.message.content.match(/#[^\s]+/gi)
 
     if (matches) {
-      for (const channel of matches) {
-        channel = channel.substring(1)
+      for (const ch of matches) {
+        let channel = channel.substring(1)
         channel = this.message.server.channels.find(c => c.name === channel)
         if (channel) this.channels.set(channel.name, channel) 
       }
