@@ -12,7 +12,7 @@ class User extends Base {
     
     if (data.uid) this.uid = data.uid
     if (data.username) this.username = data.username
-    if (data.tag) this.discriminator = data.discriminator
+    if (data.tag) this.discriminator = data.tag
     if (data.bot) this.bot = Boolean(data.bot)
     
     if (data.sessionID) this.sessionID = data.sessionID
