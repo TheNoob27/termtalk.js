@@ -128,8 +128,8 @@ class Server extends Base {
   async fetch() {
     this.client.emit("debug", `Fetching members and channels from server ${this.id}.`)
     const data = {
-      channels: await this.api.channels.get(),
-      members: await this.api.members.get()
+      channels: await this.api.channels.get().then(d => d.channels),
+      members: await this.api.members.get().then(d => d.members)
     }
     
     this._patch(data)
