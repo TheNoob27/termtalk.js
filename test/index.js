@@ -21,20 +21,21 @@ client.on("debug", console.log);
   console.log(token)
 
   await client.login(token) // or client.login(token (server.token))
-  .then(console.log)
-
-  server.channels.cache.first().send("Hello, i'm a bot")
-  client.on("message", message => {
-    if (message.author.username === "TheNoob27" && message.content.startsWith("eval ")) {
-      const { inspect } = require("util")
-      const toEval = args.split(/ +/).slice(1)
-      let res;
-      try {
-        res = inspect(eval(toEval), { depth: 0 })
-      } catch (e) {
-        res = e.message
+  .then(server => {
+    console.log(server)
+    server.channels.cache.first().send("Hello, i'm a bot")
+    client.on("message", message => {
+      if (message.author.username === "TheNoob27" && message.content.startsWith("eval ")) {
+        const { inspect } = require("util")
+        const toEval = args.split(/ +/).slice(1)
+        let res;
+        try {
+          res = inspect(eval(toEval), { depth: 0 })
+        } catch (e) {
+          res = e.message
+        }
+        message.reply(res).catch(e => message.reply("Output was probably too long."))
       }
-      message.reply(res).catch(e => message.reply("Output was probably too long."))
-    }
+    })
   })
 })()
