@@ -11,6 +11,10 @@ class Message extends Base {
     if (data) this._patch(data)
   }
   
+  get server() {
+    return this.channel.server
+  }
+  
   _patch(data) {
     if (data.id) this.id = data.id
     this.content = data.content || ""
