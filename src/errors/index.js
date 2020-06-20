@@ -10,7 +10,7 @@ const ErrorMessages = {
   CONNECTION_FAILED: "Failed to establish a connection to the server."
 }
 
-function TermTalkError(E, _) {
+function Make(E = Error, _) {
   return class TermTalkError extends E {
     constructor(m = _) {
       super(ErrorMessages[m] || m)
@@ -22,9 +22,10 @@ function TermTalkError(E, _) {
 }
 
 module.exports = {
-  create: TermTalkError,
-  TypeError: TermTalkError(TypeError),
-  RangeError: TermTalkError(RangeError),
-  Error: TermTalkError(),
+  create: Make,
+  TypeError: Make(TypeError),
+  RangeError: Make(RangeError),
+  Error: Make(),
+  APIError: require("./APIError.js"),
   messages: ErrorMessages
 }

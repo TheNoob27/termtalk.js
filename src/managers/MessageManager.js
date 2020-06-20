@@ -9,7 +9,7 @@ class MessageManager extends BaseManager {
     this.channel = channel
   }
   
-  add(data, { id, cache }) {
+  add(data, { id, cache } = {}) {
     return super.add(data, { id, cache, extras: [this.channel] })
   }
 }

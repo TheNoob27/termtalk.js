@@ -54,6 +54,8 @@ module.exports = function createRoute(manager) {
   return p(handler)
 }
 
-module.exports.p = function p(h){
+function p(h){
   return new Proxy(blank, h)
 }
+
+module.exports.p = p

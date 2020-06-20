@@ -7,8 +7,7 @@ const { Error } = require("../errors")
 class Server extends Base {
   constructor(client, data) {
     super(client)
-    
-    this.id = client.servers.cache.size
+    this.id = !this.client.servers ? data.id : this.client.servers.cache.size // client.servers isnt set yet
     this.readyAt = null
     this.socket = null
     
@@ -51,11 +50,16 @@ class Server extends Base {
   }
   
   login(deleteReject = false) {
+    if (!this.token) return Promise.reject(new Error("NO_TOKEN"))
+
     const connect = new Promise((resolve, reject) => {
       const socket = io(this.host, {
         reconnectionAttempts: 10,
-        timeout: 30000
+        timeout: 30000,
+        secure: this.secure
       })
+
+      socket.on("methodResult", console.log)
       
       const clean = (fn, a) => {
         socket.removeAllListeners()
@@ -64,7 +68,7 @@ class Server extends Base {
       
       socket.once("connect", () => {
         socket.once("methodResult", data => {
-          return data.success ? clean(resolve, data) : clean(reject, data)
+          return data.success ? clean(resolve, socket) : clean(reject, data)
         })
       })
       
@@ -75,29 +79,37 @@ class Server extends Base {
     
     return connect.then(s => {
       this.socket = s
-      
+      this.client.emit("debug", `A connection to the server has been established.`)
+
       return new Promise((resolve, reject) => { // only using promises to reject/resolve 
-        // login to the server
-        this.socket.emit("login", {
-          bot: true, // what if i set to false :flushed:
-          token: this.token
-        })
-      
-        // authenticate
-        this.socket.once("authResult", async d => {
+        // result from authenticating
+        this.socket.on("authResult", d => {
+          console.log("autho notice me")
           if (!d.success) {
             this.socket.close(true)
             return reject(d)
           }
-        
+
+          this.client.emit("debug", `Successfully connected and authenticated.`)
+          
           d.bot.bot = true
           this.clientMember = this.members.add(d.bot)
-          await this.fetch().then(d => {
+          return this.fetch().then(d => {
             this.load()
             .readyAt = Date.now()
             if (this.client.servers.cache.every(g => g.ready)) this.client.emit("ready")
             return d
           }).then(resolve).catch(reject)
+        })
+        
+        // login to the server
+        console.log({
+          bot: true, // what if i set to false :flushed:
+          token: this.token,
+        });
+        this.socket.emit("login", {
+          bot: true, // what if i set to false :flushed:
+          token: this.token
         })
       }).catch(e => {
         if (deleteReject) this.client.servers.cache.delete(this.id)
@@ -108,8 +120,13 @@ class Server extends Base {
       throw e
     })
   }
+
+  get connect() {
+    return this.login
+  }
   
   async fetch() {
+    this.client.emit("debug", `Fetching members and channels from server ${this.id}.`)
     const data = {
       channels: await this.api.channels.get(),
       members: await this.api.members.get()
@@ -122,6 +139,8 @@ class Server extends Base {
   load() {
     if (this.ready || !this.socket) return false
     
+    this.emit("debug", `Loading events for this server...`);
+
     this.socket.on("memberConnect", ({ data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
     this.socket.on("memberDisconnect", ({ data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
     
@@ -140,7 +159,7 @@ class Server extends Base {
   }
 
   get secure() {
-    return this.ip.startsWith("https")
+    return this.name.startsWith("https")
   }
   
   get name() {

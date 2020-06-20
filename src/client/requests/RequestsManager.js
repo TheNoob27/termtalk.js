@@ -1,4 +1,5 @@
 const createRoute = require("./API.js")
+const APIError = require("../../errors/APIError.js")
 
 class RequestsManager {
   constructor(client) {
@@ -14,10 +15,11 @@ class RequestsManager {
   }
 
   request(data = {}, options) {
+    let token = data.server && data.server.token || this.client.token
     Object.assign(data, {
       headers: {
-        Authorization: `Bot ${this.client.token}`,
-       "Content-Type": data.method !== "GET" ? "application/json" : "application/x-www-form-urlencoded" 
+        "Content-Type": data.method !== "GET" ? "application/json" : "application/x-www-form-urlencoded",
+        ...(token ? { Authorization: `Bot ${token}` } : {})
       }
     })
     
@@ -29,6 +31,8 @@ class RequestsManager {
       if (data.method === "GET") data.path += this._stringifyOptions(options)
       else options = JSON.stringify(options)
     }
+
+    console.log(data, options)
     
     return new Promise((resolve, reject) => {
       const http = data.server ? data.server.http || this.client.http : this.client.http
@@ -42,7 +46,7 @@ class RequestsManager {
         res.on('end', () => {
           if (res.headers["content-type"] === "application/json") data = JSON.parse(data)
           
-          if (status < 200 || status >= 300) reject(data)
+          if (status < 200 || status >= 300) reject(new APIError(data))
           else resolve(data)
         })
       })

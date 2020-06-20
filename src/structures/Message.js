@@ -51,4 +51,4 @@ class Message extends Base {
   }
 }
 
-module.exports = Channel
+module.exports = Message
