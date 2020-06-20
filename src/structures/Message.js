@@ -17,7 +17,7 @@ class Message extends Base {
   
   _patch(data) {
     if (data.id) this.id = data.id
-    this.content = data.content || ""
+    this.content = data.msg || ""
     
     if (data.userID) this.author = this.server.members.add({
       username: data.username, 
