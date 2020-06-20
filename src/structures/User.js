@@ -50,6 +50,10 @@ class User extends Base {
   mutualServers() {
     return this.client.servers.cache.filter(s => s.members.cache.has(this.id))
   }
+
+  toString() {
+    return `@${this.tag}`
+  }
 }
 
 module.exports = User

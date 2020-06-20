@@ -41,7 +41,7 @@ class Message extends Base {
   
   reply(msg = "") {
     if (typeof msg !== "string") return Promise.reject(new Error("MESSAGE_TYPE"))
-    msg = `${this.user ? this.user.discriminator : "@User#0000"}${msg && ", "}${msg}`
+    msg = `${this.user || "@User#0000"}${msg && ", "}${msg}`
     
     return this
       .server.api

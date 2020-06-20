@@ -17,15 +17,18 @@ client.on("debug", console.log);
     ownerPassword: "thenoob27",
   });
   */
-  const token = "MTU5MjYyMTE1MjkyNg==.MTM0NTAwOTY2MTYxNDg5OTI=.$2b$20$VPA3P.QY1DUduwazKaHFke"
+  const token = require("./token.js") // pretend this is env lol
   console.log(token)
 
   await client.login(token) // or client.login(token (server.token))
   .then(server => {
     console.log(server)
-    server.channels.cache.first().send("Hello, i'm a bot")
+    // server.channels.cache.first().send("Hello, i'm a bot")
     client.on("message", message => {
-      if (message.author.username === "TheNoob27" && message.content.startsWith("eval ")) {
+      console.log(message.content, message.content.length)
+      if (message.author.username !== "TheNoob27") return;
+
+      if (message.content.toLowerCase().startsWith("eval ")) {
         const { inspect } = require("util")
         const toEval = args.split(/ +/).slice(1)
         let res;
@@ -35,6 +38,8 @@ client.on("debug", console.log);
           res = e.message
         }
         message.reply(res).catch(e => message.reply("Output was probably too long."))
+      } else if (message.content.toLowerCase().startsWith("say ")) {
+        message.reply(message.content.slice(4))
       }
     })
   })
