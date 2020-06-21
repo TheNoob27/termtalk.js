@@ -2,11 +2,12 @@ const Base = require("./Base.js")
 const MemberManager = require("../managers/MemberManager.js")
 const ChannelManager = require("../managers/ChannelManager.js")
 const io = require("socket.io-client") // uh
-const { Error } = require("../errors")
+const { Error, messages } = require("../errors")
 
 class Server extends Base {
   constructor(client, data) {
     super(client)
+    
     this.id = !this.client.servers ? data.id : this.client.servers.cache.size // client.servers isnt set yet
     this.readyAt = null
     this.socket = null
@@ -59,8 +60,6 @@ class Server extends Base {
         secure: this.secure
       })
 
-      socket.on("methodResult", console.log)
-      
       const clean = (fn, a) => {
         socket.removeAllListeners()
         return fn(a)
@@ -80,11 +79,15 @@ class Server extends Base {
     return connect.then(s => {
       this.socket = s
       this.client.emit("debug", `A connection to the server has been established.`)
-
+      
       return new Promise((resolve, reject) => { // only using promises to reject/resolve 
+        this.socket.emit("login", {
+          bot: true, // what if i set to false :flushed:
+          token: this.token
+        })
+
         // result from authenticating
         this.socket.on("authResult", d => {
-          console.log("autho notice me")
           if (!d.success) {
             this.socket.close(true)
             return reject(d)
@@ -100,11 +103,6 @@ class Server extends Base {
             if (this.client.servers.cache.every(g => g.ready)) this.client.emit("ready")
             return d
           }).then(resolve).catch(reject)
-        })
-        
-        this.socket.emit("login", {
-          bot: true, // what if i set to false :flushed:
-          token: this.token
         })
       }).catch(e => {
         if (deleteReject) this.client.servers.cache.delete(this.id)
@@ -134,18 +132,31 @@ class Server extends Base {
   load() {
     if (this.ready || !this.socket) return false
     
-    this.client.emit("debug", `Loading events for this server...`);
-
-    this.socket.on("memberConnect", ({ member: data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
-    this.socket.on("memberDisconnect", ({ member: data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
+    this.client.emit("debug", `Loading events for server ${this.id}...`);
+    this.socket
+    .on("memberConnect", ({ member: data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
+    .on("memberDisconnect", ({ member: data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
     
-    this.socket.on("msg", data => {
+    .on("msg", data => {
+      if (data.server) return; // server message
       const channel = this.channels.add({ name: data.channel })
       data.channel = channel
       return this.client.emit("message", channel.messages.add(data))
     })
     
     // oh thats it?
+
+    // these most likely wont happen but eh sure
+    .on("disconnect", reason => {
+      if (reason === "io server disconnect") {
+        this.client.emit("debug", `Server ${this.id} asked us to disconnect.`)
+        reason = "Reqeuested by the server"
+      }
+      this.client.emit("disconnect", reason)
+    })
+
+    .on("reconnect", (tries = 1) => this.client.emit("debug", `Sucessfully reconnected to server ${this.id} after ${tries} tries.`))
+    .on("reconnect_attempt", n => !n ? this.client.emit("debug", `I am trying to reconnect to ${this.id} now...`) : null)
     return this
   }
 

@@ -1,6 +1,6 @@
 const EventEmitter = require("events")
 const RequestsManager = require("./requests/RequestsManager.js")
-const { Error, TypeError, RangeError } = require("../errors")
+const { Error, TypeError, RangeError, APIError } = require("../errors")
 const Server = require("../structures/Server.js")
 const ServerManager = require("../managers/ServerManager.js")
 const UserManager = require("../managers/UserManager.js")
@@ -16,6 +16,7 @@ class Client extends EventEmitter {
     this.options = this.parseOptions(options)
     
     this.requests = new RequestsManager(this)
+    console.log(this.options.ip.map((ip, i) => console.log(i) || ({ ip, port: this.options.port[i], id: i })))
     this.servers = new ServerManager(this, 
       this.options.ip.map((ip, i) => console.log(i) || ({ ip, port: this.options.port[i], id: i }))
     )
@@ -73,16 +74,24 @@ class Client extends EventEmitter {
     // to be similar to every other manager
   }
   
-  create({ id, username, tag, uid: _ = null, ownerID, ownerUid = null, ownerPassword, ip = this.options.ip[0], port = this.options.port[0] } = {}, autoLogin = false) {
+  create({ id, username, tag, uid: _ = null, ownerID, ownerUid = null, ownerPassword, ip, port } = {}, autoLogin = false) {
     if (_ && !id) id = _
     if (ownerUid && !ownerID) ownerID = ownerUid
+    if (!ip || !port) {
+      if (this.servers.cache.size) {
+        let available = this.servers.cache.find(s => !s.ready && s.ip)
+        if (available) console.log("available: ", available.id) || ({ ip = ip , port = port } = available)
+      } // no available vvv
+      if ((!ip || !port) && this.options.ip.length) [ [ip = ip], [port = port] ] = [this.options.ip, this.options.port]
+    }
+    console.log("ip, port:", ip, port)
+    
     const data = [id, username, tag, ownerID, ownerPassword, ip, port]
-    if ((!ip || !port) && this.options.ip.length) [ ip = ip, port = port ] = [this.options.ip, this.options.port]
-
     if (data.some(i => !i)) return Promise.reject(new Error("BOT_CREATE_INFO"))
     if (data.slice(0, -1).some(i => typeof i !== "string") || typeof port !== "number") return Promise.reject(new TypeError("BOT_CREATE_TYPE"))
     
     const server = this.servers.add({ ip, port })
+    console.log("creatbit", server.id)
     this.emit("debug", `Created a server. IP: ${ip}, Port: ${port}. Creating bot now...`)
 
     return this.api.server(server).bots.create.post({
@@ -92,7 +101,7 @@ class Client extends EventEmitter {
       username,
       tag
     }).then(({ token } = {}) => {
-      this.emit("debug", `Bot has been created`)
+      this.emit("debug", `Bot has been created${autoLogin ? ", logging in..." : "."}`)
       if (!this.options.ip) this.options.ip = ip
       if (!this.options.port) this.options.port = port
       
@@ -107,16 +116,26 @@ class Client extends EventEmitter {
       server._patch({ token })
       if (autoLogin) return this.login({ token, server })
       return server
+    }).catch(e => {
+      throw e instanceof Error ? e : new APIError(e)
     })
   }
   
   login(options) {
-    let { ip = this.options.ip[0], port = this.options.port[0], token, server: s } = options || {}
+    let { ip, port, token, server: s } = options || {}
     if (typeof options === "string") token = options
-    
-    let server = s instanceof Server ? s : this.servers.cache.find(s => s.token === token)
+    if (![ip, token, s].some(Boolean)) return Promise.reject(new Error("NO_LOGIN_OPTIONS"))
+
+    let server = s instanceof Server ? s : this.servers.cache.find(s => !s.ready && s.token && s.token === token)
+    if (!server && (!ip || !port) && token) {
+      let available = this.servers.cache.find(s => !s.ready && s.ip)
+      if (available) ({ ip, port, token = token} = available)
+    }
+
+    //console.log(ip, port, token, this.servers.cache)
+
     if (!server && !(ip || port)) return Promise.reject(new Error("INVALID_TOKEN"))
-    if (!server) server = this.servers.cache.find(s => s.ip === ip)
+    if (!server && ip) server = this.servers.cache.find(s => s.ip === ip)
     if (server) {
       this.emit("debug", `Connecting to the server now...`)
       if (!server.token) server._patch({ token })
@@ -145,7 +164,7 @@ class Client extends EventEmitter {
     if (!data || typeof data !== "object") return defaultOptions
     
     if ("ip" in data && (typeof data.ip !== "string" && !(data.ip instanceof Array) || !data.ip.length)) throw new TypeError("OPTIONS_INVALID")
-    if ("port" in data && (typeof data.port !== "number" || isNaN(data.port))) throw new TypeError("OPTIONS_INVALID")
+    if ("port" in data && (typeof data.port !== "number" && !(data.ip instanceof Array))) throw new TypeError("OPTIONS_INVALID")
     // 1 is not array and other is array
     if ([Array.isArray(data.port), Array.isArray(data.ip)].reduce((prev, a) => a === prev ? a : null) === null) throw new TypeError("OPTIONS_INVALID")
     if (Array.isArray(data.ip) ? data.ip.length !== data.port.length : false) throw new RangeError("OPTIONS_LENGTH")
@@ -162,6 +181,7 @@ class Client extends EventEmitter {
       port: [data.port].flat()
     })
     
+    console.log(options)
     return options
   }
   

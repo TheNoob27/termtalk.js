@@ -11,13 +11,11 @@ class MemberManager extends BaseManager {
   add(data, { cache, id } = {}) {
     return super.add(data, { cache, id, extras: [this.server] })
   }
-  
-  get guild() {
-    return this.server
-  }
 
   fetch() {
-    return this.server.api.members.get()
+    return this.server.api.members.get().then(({ members: data }) => {
+      this.server._patch({ data })
+    })
   }
 }
 

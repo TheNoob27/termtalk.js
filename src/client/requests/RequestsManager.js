@@ -31,8 +31,6 @@ class RequestsManager {
       if (data.method === "GET") data.path += this._toQuery(options)
       else options = JSON.stringify(options)
     }
-
-    console.log(data, options)
     
     return new Promise((resolve, reject) => {
       const http = data.server ? data.server.http || this.client.http : this.client.http

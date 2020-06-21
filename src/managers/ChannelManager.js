@@ -17,6 +17,12 @@ class ChannelManager extends BaseManager {
     if (data instanceof Message) return super.resolve(data.channel)
     return super.resolve(data)
   }
+
+  fetch() {
+    return this.server.api.channels.get().then(({ channels: data }) => {
+      this.server._patch({ data })
+    })
+  }
 }
 
 module.exports = ChannelManager

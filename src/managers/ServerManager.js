@@ -9,9 +9,11 @@ class ServerManager extends BaseManager {
   add(data = {}, { id, cache = true, extras = [] } = {}) {
     const exists = this.cache.find(
       (s) =>
-        s.token === data.token ||
+        (s.token && s.token === data.token) ||
         s.name.replace(/https?:\/\//, "") === (data.ip || "").replace(/https?:\/\//, "")
     )
+    console.log("exists servermansge:", !!exists)
+    if (exists) console.log(exists)
 
     if (exists && exists._patch && cache) exists._patch(data);
     if (exists) return exists;

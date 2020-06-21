@@ -1,9 +1,10 @@
 const ErrorMessages = {
-  BOT_CREATE_INFO: "Not enough information was provided to create a bot. Please remember to provide ownerID, and ownerPassword",
+  BOT_CREATE_INFO: "Not enough information was provided to create a bot. Please remember to also provide ownerID, and ownerPassword",
   BOT_CREATE_TYPE: "Some of the provided information is of the wrong type.",
   INVALID_TOKEN: "An invalid token was provided.",
   OPTIONS_INVALID: "Invalid options were provided.",
   OPTIONS_LENGTH: "Please provide an equal amount of IPs and Ports.",
+  NO_LOGIN_OPTIONS: "Please specify an IP, Port, and/or Token to use to login.",
 
   MESSAGE_TYPE: "The message must be a string.",
   USER_DM: "Cannot send DMs to this user.",

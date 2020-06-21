@@ -18,17 +18,18 @@ class MessageMentions {
       for (const ping of matches) {
         const [username, discrim] = ping.substring(1).split("#")
         if (!(username && discrim)) continue;
-        const user = this.message.server.members.find(m => m.user && m.user.username === username && m.user.discriminator === discrim)
+        const user = this.message.server.members.cache.find(m => m.user && m.user.username === username && m.user.discriminator === discrim)
         if (user) this.users.set(user.id, user)
       }
     }
 
-    matches = this.message.content.match(/#[^\s]+/gi)
+    matches = this.message.content.match(/#[^\s#]+/gi)
 
     if (matches) {
       for (const ch of matches) {
-        let channel = channel.substring(1)
-        channel = this.message.server.channels.find(c => c.name === channel)
+        let channel = ch.substring(1)
+        if (channel.length === 4 && !isNaN(channel)) continue; // user discriminator
+        channel = this.message.server.channels.cache.find(c => c.name === channel)
         if (channel) this.channels.set(channel.name, channel) 
       }
     }

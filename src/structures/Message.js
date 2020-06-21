@@ -19,36 +19,34 @@ class Message extends Base {
     if (data.id) this.id = data.id
     this.content = data.msg || ""
     
-    if (data.userID) this.author = this.server.members.add({
-      username: data.username, 
-      tag: data.tag, 
-      uid: data.uid, 
-      id: data.userID 
-    })
+    if (data.userID) {
+      this.member = this.server.members.add({
+        username: data.username, 
+        tag: data.tag, 
+        uid: data.uid, 
+        id: data.userID 
+      })
+      this.author = this.member.user
+    }
+    
+    this.system = Boolean(data.server)
     
     if (this.content) {
       this.mentions.parse()
     }
   }
   
-  get user() {
-    return this.author && this.author.user
-  }
-  
-  get member() {
-    return this.author
-  }
   
   reply(msg = "") {
     if (typeof msg !== "string") return Promise.reject(new Error("MESSAGE_TYPE"))
-    msg = `${this.user || "@User#0000"}${msg && ", "}${msg}`
+    msg = `${this.author || "@User#0000"}${msg && ", "}${msg}`
     
     return this
       .server.api
       .channels(this.channel.id)
       .messages
       .post({
-        ...this.client.user.json,
+        ...(this.server.me ? this.server.me.user.json : this.client.user.json),
         msg
       })
       .then(message => this.channel.messages.add(message))

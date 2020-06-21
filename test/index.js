@@ -6,6 +6,7 @@ const client = new Client({
 })
 
 client.on("debug", console.log);
+client.on("ready", console.log.bind("I am ready!"));
 
 (async () => {
   /*
@@ -14,23 +15,32 @@ client.on("debug", console.log);
     ownerID: "TheNoob27",
     username: "TermTalk.js",
     tag: "1273",
-    ownerPassword: "thenoob27",
+    ownerPassword: "",
   });
+  ---
+  const { token } = await client.create({
+    username: "TermTalk.js",
+    id: "TermTalk.js",
+    tag: "1273",
+    ownerID: "TheNoob27",
+    ownerPassword: "",
+    ip: "https://terminals.rest",
+    port: 7500
+  }, true)
   */
-  const token = require("./token.js") // pretend this is env lol
+  const [ token ] = require("./token.js") // pretend this is env lol
   console.log(token)
 
   await client.login(token) // or client.login(token (server.token))
   .then(server => {
-    console.log(server)
     // server.channels.cache.first().send("Hello, i'm a bot")
     client.on("message", message => {
-      console.log(message.content, message.content.length)
-      if (message.author.username !== "TheNoob27") return;
+      console.log(message)
+      if (!message.author || message.author.username !== "TheNoob27") return;
 
       if (message.content.toLowerCase().startsWith("eval ")) {
         const { inspect } = require("util")
-        const toEval = args.split(/ +/).slice(1)
+        const toEval = message.content.slice(5)
         let res;
         try {
           res = inspect(eval(toEval), { depth: 0 })
