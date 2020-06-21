@@ -40,15 +40,10 @@ class Server extends Base {
       for (const channel of data.channels) this.channels.add(channel)
     }
     
-    if (data.memberList || data.members instanceof Array) {
-      let members = data.memberList || data.members
+    if (data.members) {
       this.members.cache.clear()
-      for (const member of members) this.members.add(member)
+      for (const member of data.members) this.members.add(member)
     }
-    
-    if (data.name) this.name = data.name
-    if (data.maxMembers) this.maxMembers = data.maxMembers
-    if (typeof data.members === "number") this.memberCount = data.members
   }
 
   get me() {
@@ -124,13 +119,11 @@ class Server extends Base {
   }
   
   async fetch() {
-    this.client.emit("debug", `Fetching data from server ${this.id}.`)
+    this.client.emit("debug", `Fetching members and channels from server ${this.id}.`)
     const data = {
       channels: await this.api.channels.get().then(d => d.channels),
-      memberList: await this.api.members.get().then(d => d.members),
-      ...(await this.api.ping.get())
+      members: await this.api.members.get().then(d => d.members)
     }
-    if (data.ip) delete data.ip
     
     this._patch(data)
     return this
