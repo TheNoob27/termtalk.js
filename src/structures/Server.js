@@ -29,8 +29,11 @@ class Server extends Base {
   _patch(data) {
     if (data.token) Object.defineProperty(this, "token", { value: data.token, writable: true })
     if (typeof data.ip === "string") {
+      if (data.secure && !data.ip.startsWith("https")) data.ip = "https://" + data.ip.replace(/https?:\/\//, "") // just to make sure :^)
       this.ip = data.ip.startsWith("http") ? data.ip : `http://${data.ip}`
       this.http = this.secure ? require("https") : require("http")
+    } else if (data.secure && typeof this.ip === "string" && !this.ip.startsWith("https")) {
+      this.ip = `https://${this.ip.startsWith("http") ? this.ip.slice(7) : this.ip}`
     }
     
     if (data.port) this.port = data.port
@@ -40,10 +43,15 @@ class Server extends Base {
       for (const channel of data.channels) this.channels.add(channel)
     }
     
-    if (data.members) {
+    if (data.members instanceof Array) {
       this.members.cache.clear()
       for (const member of data.members) this.members.add(member)
+      this.memberCount = this.members.cache.size
     }
+    
+    if (data.name) this.name = data.name
+    if (data.maxMembers) this.maxMembers = data.maxMembers
+    if (data.ping) this.ping = data.ping
   }
 
   get me() {
@@ -119,18 +127,22 @@ class Server extends Base {
   }
   
   async fetch() {
-    this.client.emit("debug", `Fetching members and channels from server ${this.id}.`)
-    const data = {
-      channels: await this.api.channels.get().then(d => d.channels),
-      members: await this.api.members.get().then(d => d.members)
-    }
+    this.client.emit("debug", `Fetching data from server ${this.id}.`)
+    let ping = Date.now()
+     const data = {
+       ...(await this.api.ping.get()), // ping the server, we gonna override some of its data anyway
+       ping: Date.now() - ping,
+       channels: await this.api.channels.get().then(d => d.channels),
+       members: await this.api.members.get().then(d => d.members)
+     }
+     if (data.ip) delete data.ip
     
     this._patch(data)
     return this
   }
    
   load() {
-    if (this.ready || !this.socket) return false
+    if (this.ready || !this.socket) return this
     
     this.client.emit("debug", `Loading events for server ${this.id}...`);
     this.socket
