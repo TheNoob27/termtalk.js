@@ -28,6 +28,10 @@ class ServerManager extends BaseManager {
   get connect() {
     return this.client.login;
   }
+  
+  get ping() {
+    return this.cache.reduce((pings, { ping }) => pings + (ping || 0), 0) / this.cache.size
+  }
 }
 
 module.exports = ServerManager
