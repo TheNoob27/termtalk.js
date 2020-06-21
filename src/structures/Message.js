@@ -20,15 +20,15 @@ class Message extends Base {
     this.content = data.msg || ""
     
     if (data.userID) {
-      this.member = this.server.members.add({
+      this.author = this.server.members.add({
         username: data.username, 
         tag: data.tag, 
         uid: data.uid, 
         id: data.userID 
       })
-      this.author = this.member.user
     }
     
+    // ik i ignore server messages but eh
     this.system = Boolean(data.server)
     
     if (this.content) {
@@ -46,10 +46,10 @@ class Message extends Base {
       .channels(this.channel.id)
       .messages
       .post({
-        ...(this.server.me ? this.server.me.user.json : this.client.user.json),
+        ...((this.server.me || this.client.user || {}).json),
         msg
       })
-      .then(message => this.channel.messages.add(message))
+      .then(({ message }) => this.channel.messages.add(message))
   }
 }
 

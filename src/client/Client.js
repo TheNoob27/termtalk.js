@@ -20,7 +20,6 @@ class Client extends EventEmitter {
     this.servers = new ServerManager(this, 
       this.options.ip.map((ip, i) => console.log(i) || ({ ip, port: this.options.port[i], id: i }))
     )
-    this.users = new UserManager(this)
   }
   
   get api() {
@@ -48,7 +47,7 @@ class Client extends EventEmitter {
   }
   
   get user() {
-    return this.servers.cache.find(s => s.clientMember && s.clientMember.user)
+    return this.servers.cache.find(s => s.clientMember && s.clientMember)
   }
   
   get channels() {
@@ -70,6 +69,21 @@ class Client extends EventEmitter {
     return {
       client: this,
       cache: channels 
+    }
+    // to be similar to every other manager
+  }
+
+  get users() {
+    const users = new Collection()
+    for (const server of this.servers.cache.values()) {
+      for (const member of server.members.cache.values()) {
+        users.set(member.id, member)
+      }
+    }
+
+    return {
+      client: this,
+      cache: users
     }
     // to be similar to every other manager
   }
@@ -105,13 +119,6 @@ class Client extends EventEmitter {
       if (!this.options.ip) this.options.ip = ip
       if (!this.options.port) this.options.port = port
       
-      this.users.add({ 
-        uid: id, 
-        username, tag, 
-        bot: true,
-        ownerUid, ownerPassword,
-        id // yes its uid but it'll be _patched later
-      })
       
       server._patch({ token })
       if (autoLogin) return this.login({ token, server })

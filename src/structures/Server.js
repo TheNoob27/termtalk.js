@@ -13,13 +13,14 @@ class Server extends Base {
     this.socket = null
     
     this.members = new MemberManager(this)
+    this.memberCount = 0
     this.channels = new ChannelManager(this)
     
     if (data) this._patch(data)
   }
   
   get sessionID() {
-    return this.clientMember && this.clientMember.user.sessionID
+    return this.clientMember && this.clientMember.sessionID
   }
   
   get ready() {
@@ -146,10 +147,19 @@ class Server extends Base {
     
     this.client.emit("debug", `Loading events for server ${this.id}...`);
     this.socket
-    .on("memberConnect", ({ member: data } = {}) => this.client.emit("memberJoin", this.members.add(data)))
-    .on("memberDisconnect", ({ member: data } = {}) => this.client.emit("memberLeave", this.members.add(data, { cache: false })))
+    .on("memberConnect", ({ member: data } = {}) => {
+      this.client.emit("raw", data)
+      this.memberCount++
+      this.client.emit("memberJoin", this.members.add(data))
+    })
+    .on("memberDisconnect", ({ member: data } = {}) => {
+      this.client.emit("raw", data)
+      this.memberCount--
+      this.client.emit("memberLeave", this.members.add(data, { cache: false }))
+    })
     
     .on("msg", data => {
+      this.client.emit("raw", data)
       if (data.server) return; // server message
       const channel = this.channels.add({ name: data.channel })
       data.channel = channel
@@ -186,6 +196,10 @@ class Server extends Base {
 
   get api() {
     return this.client.api.server(this)
+  }
+
+  get uptime() {
+    return Date.now() - this.readyAt
   }
   
   toString() {

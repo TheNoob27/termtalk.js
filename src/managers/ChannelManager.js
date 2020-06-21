@@ -21,6 +21,7 @@ class ChannelManager extends BaseManager {
   fetch() {
     return this.server.api.channels.get().then(({ channels: data }) => {
       this.server._patch({ data })
+      return this.server.channels.cache
     })
   }
 }

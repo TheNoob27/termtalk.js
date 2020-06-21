@@ -18,7 +18,7 @@ class MessageMentions {
       for (const ping of matches) {
         const [username, discrim] = ping.substring(1).split("#")
         if (!(username && discrim)) continue;
-        const user = this.message.server.members.cache.find(m => m.user && m.user.username === username && m.user.discriminator === discrim)
+        const user = this.message.server.members.cache.find(m => m.username === username && m.discriminator === discrim)
         if (user) this.users.set(user.id, user)
       }
     }

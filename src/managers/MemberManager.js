@@ -15,6 +15,7 @@ class MemberManager extends BaseManager {
   fetch() {
     return this.server.api.members.get().then(({ members: data }) => {
       this.server._patch({ data })
+      return this.server.members.cache
     })
   }
 }
