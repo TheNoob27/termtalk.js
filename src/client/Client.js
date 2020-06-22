@@ -53,7 +53,7 @@ class Client extends EventEmitter {
     const channels = new Collection()
     const single = this.servers.cache.size === 1
     for (const server of this.servers.cache.values()) {
-      for (const [name, channel] of server.channels.cache.keys()) {
+      for (const [name, channel] of server.channels.cache) {
         if (!single && (name === "General" || channels.has(name))) {
           channels.set(`${name}_${server.id}`, channel)
           if (channels.has(name)) {
