@@ -130,7 +130,10 @@ class Client extends EventEmitter {
   login(options) {
     let { ip, port, token, server: s } = options || {}
     if (typeof options === "string") token = options
-    if (![ip, token, s].some(Boolean)) return Promise.reject(new Error("NO_LOGIN_OPTIONS"))
+    if (![ip, token, s].some(Boolean)) {
+      s = this.servers.cache.find(s => !s.ready && s.token && s.ip && s.port)
+      if (!s) return Promise.reject(new Error("NO_LOGIN_OPTIONS"))
+    }
 
     let server = s instanceof Server ? s : this.servers.cache.find(s => !s.ready && s.token && s.token === token)
     if (!server && (!ip || !port) && token) {
