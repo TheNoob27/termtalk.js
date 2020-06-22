@@ -14,16 +14,17 @@ class RequestsManager {
     return this.request
   }
 
-  request(data = {}, options) {
+  request(data = {}, options = {}) {
     let token = data.server && data.server.token || this.client.token
+    let isPing = data.url === "/ping"
     Object.assign(data, {
       headers: {
         "Content-Type": data.method !== "GET" ? "application/json" : "application/x-www-form-urlencoded",
-        ...(token ? { Authorization: `Bot ${token}` } : {})
+        ...(token && !isPing ? { Authorization: `Bot ${token}` } : {}) // why bother authorising for ping
       }
     })
     
-    if (data.server && data.server.sessionID || this.client.user.sessionID) Object.assign(options || (options = {}), {
+    if (!isPing && !options.sessionID && data.server && data.server.sessionID || this.client.user.sessionID) Object.assign(options, {
       sessionID: data.server && data.server.sessionID || this.client.user.sessionID
     })
     
