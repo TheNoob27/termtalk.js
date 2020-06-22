@@ -3,7 +3,6 @@ const RequestsManager = require("./requests/RequestsManager.js")
 const { Error, TypeError, RangeError, APIError } = require("../errors")
 const Server = require("../structures/Server.js")
 const ServerManager = require("../managers/ServerManager.js")
-const UserManager = require("../managers/UserManager.js")
 const Collection = require("../util/Collection.js")
 
 class Client extends EventEmitter {

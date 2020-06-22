@@ -15,5 +15,4 @@ module.exports = {
   MemberManager: require("./managers/MemberManager.js"),
   MessageManager: require("./managers/MessageManager.js"),
   ServerManager: require("./managers/ServerManager.js"),
-  UserManager: require("./managers/UserManager.js"),
 }
