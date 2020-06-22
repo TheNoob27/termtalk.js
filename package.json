@@ -1,13 +1,13 @@
 {
-	"name": "termtalk.js",
-	"version": "0.0.1",
-	"description": "TermTalk bot library with a very original name.",
-	"main": "src/index.js",
-	"dependencies": {
-		"@discordjs/collection": "^0.1.5",
-		"socket.io-client": "^2.3.0"
-	},
-	"scripts": {
-		"test": "node test/index.js"
-	}
+  "name": "termtalk.js",
+  "version": "0.1.0",
+  "description": "TermTalk bot library with a very original name.",
+  "main": "src/index.js",
+  "dependencies": {
+    "@discordjs/collection": "^0.1.5",
+    "socket.io-client": "^2.3.0"
+  },
+  "scripts": {
+    "test": "node test/index.js"
+  }
 }
