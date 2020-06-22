@@ -29,7 +29,7 @@ class Member extends Base {
       .members(this.id)
       .messages
       .post({
-        ...((this.server.me || this.client.user || {}).json),
+        ...((this.server.me || this.client.user).json),
         msg
       }).then(() => this)
   }

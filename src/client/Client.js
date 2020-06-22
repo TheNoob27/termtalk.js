@@ -46,7 +46,7 @@ class Client extends EventEmitter {
   }
   
   get user() {
-    return this.servers.cache.find(s => s.clientMember && s.clientMember)
+    return this.servers.cache.find(s => s.clientMember && s.clientMember) || {}
   }
   
   get channels() {
@@ -123,7 +123,7 @@ class Client extends EventEmitter {
       if (autoLogin) return this.login({ token, server })
       return server
     }).catch(e => {
-      throw e instanceof Error ? e : new APIError(e)
+      throw e instanceof Object.getPrototypeOf(Error) ? e : new APIError(e)
     })
   }
   

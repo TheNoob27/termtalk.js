@@ -46,7 +46,7 @@ class Message extends Base {
       .channels(this.channel.id)
       .messages
       .post({
-        ...((this.server.me || this.client.user || {}).json),
+        ...((this.server.me || this.client.user).json),
         msg
       })
       .then(({ message }) => this.channel.messages.add(message))

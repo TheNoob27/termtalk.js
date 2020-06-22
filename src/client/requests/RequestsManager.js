@@ -24,7 +24,7 @@ class RequestsManager {
       }
     })
     
-    if (!isPing && !options.sessionID && data.server && data.server.sessionID || this.client.user.sessionID) Object.assign(options, {
+    if (!isPing && !options.sessionID && (data.server && data.server.sessionID || this.client.user.sessionID)) Object.assign(options, {
       sessionID: data.server && data.server.sessionID || this.client.user.sessionID
     })
     if (isPing && options.sessionID) delete options.sessionID
@@ -37,6 +37,7 @@ class RequestsManager {
     return new Promise((resolve, reject) => {
       const http = data.server ? data.server.http || this.client.http : this.client.http
       
+      const noResponse = setTimeout(() => reject(new Error("The server took too long to respond.")), 30000)
       const request = http.request(data, res => {
         const status = res.statusCode
 
@@ -44,6 +45,7 @@ class RequestsManager {
         res.setEncoding('utf8')
         res.on('data', (chunk) => data += chunk)
         res.on('end', () => {
+          clearTimeout(noResponse)
           if (res.headers["content-type"] === "application/json") data = JSON.parse(data)
           
           if (status < 200 || status >= 300) reject(new APIError(data))

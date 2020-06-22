@@ -15,7 +15,7 @@ client.on("debug", console.log).on("ready", () => console.log("I am ready!!!!!!!
     id: "TermTalk.js",
     tag: "1273",
     ownerID: "TheNoob27",
-    ownerPassword: ""
+    ownerPassword: "thenoob27"
   }, true)
   console.log(token2)
   await client.login(tokens[0])
