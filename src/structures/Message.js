@@ -1,6 +1,7 @@
 const Base = require("./Base.js")
 const { Error } = require("../errors")
 const MessageMentions = require("./MessageMentions.js")
+const Member = require("./Member.js")
 
 class Message extends Base {
   constructor(client, data, channel) {
@@ -12,7 +13,7 @@ class Message extends Base {
   }
   
   get server() {
-    return this.channel.server
+    return this.channel.server instanceof Member ? this.channel.server.server : this.channel.server
   }
   
   _patch(data) {
@@ -41,15 +42,7 @@ class Message extends Base {
     if (typeof msg !== "string") return Promise.reject(new Error("MESSAGE_TYPE"))
     msg = `${this.author || "@User#0000"}${msg && ", "}${msg}`
     
-    return this
-      .server.api
-      .channels(this.channel.id)
-      .messages
-      .post({
-        ...((this.server.me || this.client.user).json),
-        msg
-      })
-      .then(({ message }) => this.channel.messages.add(message))
+    return this.channel.send(msg)
   }
 }
 
