@@ -4,6 +4,7 @@ class Member extends Base {
   constructor(client, data, server) {
     super(client)
     this.server = server
+    this.dm = new Channel(client, { name: "DM" }, this)
     
     if (data) this._patch(data)
   }
