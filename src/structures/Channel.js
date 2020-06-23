@@ -2,6 +2,7 @@ const Base = require("./Base.js")
 const Messages = require("../managers/MessageManager.js")
 const Member = require("./Member.js")
 const { Error } = require("../errors")
+const MessageCollector = require("../util/MessageCollector.js")
 
 class Channel extends Base {
   constructor(client, data, server) {
@@ -33,6 +34,17 @@ class Channel extends Base {
         msg
       })
       .then(({ message }) => this.messages.add(message))
+  }
+  
+  createMessageCollector(filter, options) {
+    return new MessageCollector(this, filter, options)
+  }
+  
+  awaitMessages(filter, options = {}) {
+    return new Promise((resolve, reject) => {
+      this.createMessageCollector(filter, options)
+      .once("end", (reason, msgs) => options && options.errors && options.errors.includes(reason) ? reject(msgs) : resolve(msgs))
+    })
   }
 }
 
