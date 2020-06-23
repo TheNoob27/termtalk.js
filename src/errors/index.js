@@ -3,7 +3,7 @@ const ErrorMessages = {
   BOT_CREATE_TYPE: "Some of the provided information is of the wrong type.",
   INVALID_TOKEN: "An invalid token was provided.",
   OPTIONS_INVALID: "Invalid options were provided.",
-  OPTIONS_LENGTH: "Please provide an equal amount of IPs and Ports.",
+  OPTIONS_LENGTH: "Please provide an equal amount of IPs, Ports and Tokens.",
   NO_LOGIN_OPTIONS: "Please specify an IP, Port, and/or Token to use to login.",
 
   MESSAGE_TYPE: "The message must be a string.",

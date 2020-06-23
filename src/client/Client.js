@@ -12,13 +12,26 @@ class Client extends EventEmitter {
       value: require("http"), // default http
       writable: true // no enumerability for me
     })
+    
     this.options = this.parseOptions(options)
     
     this.requests = new RequestsManager(this)
-    console.log(this.options.ip.map((ip, i) => console.log(i) || ({ ip, port: this.options.port[i], id: i })))
+    
     this.servers = new ServerManager(this, 
-      this.options.ip.map((ip, i) => console.log(i) || ({ ip, port: this.options.port[i], id: i }))
+      this.options.ip.map((ip, i) => ({ 
+        ip, 
+        port: this.options.port[i], 
+        token: this.options.token[i],
+        id: i
+      }))
     )
+    // make it non-enumerable? hm should i keep this??
+    if (this.options.token) Object.defineProperty(this.options, "token", {
+      value: this.options.token,
+      writable: true,
+      configurable: true,
+      enumerable: false
+    })
   }
   
   get api() {
@@ -128,7 +141,17 @@ class Client extends EventEmitter {
   }
   
   login(options) {
-    let { ip, port, token, server: s } = options || {}
+    if (!options && this.servers.cache.every(server => !server.ready && server.ip && server.port && server.token)) {
+      return Promise.all(this.servers.cache.map(server => server.login()))
+    } else if (!options) {
+      let ableToLogin = this.servers.cache.filter(server => !server.ready && server.ip && server.port && server.token)
+      if (ableToLogin.size) return Promise.all(ableToLogin.map(server => server.login()))
+      return Promise.reject(new Error("NO_LOGIN_OPTIONS"))
+    }
+
+    if (Array.isArray(options)) return Promise.all(options.map(this.login.bind(this)))
+
+    let { ip, port, token, server: s } = options
     if (typeof options === "string") token = options
     if (![ip, token, s].some(Boolean)) {
       s = this.servers.cache.find(s => !s.ready && s.token && s.ip && s.port)
@@ -165,6 +188,7 @@ class Client extends EventEmitter {
     const defaultOptions = {
       ip: ["localhost"], // lol ik you cant do public with this but thats their fault
       port: [3000], // random port
+      token: [],
       messageCacheSize: 30
       // idk more options soon
     },
@@ -174,10 +198,15 @@ class Client extends EventEmitter {
     
     if ("ip" in data && (typeof data.ip !== "string" && !(data.ip instanceof Array) || !data.ip.length)) throw new TypeError("OPTIONS_INVALID")
     if ("port" in data && (typeof data.port !== "number" && !(data.ip instanceof Array))) throw new TypeError("OPTIONS_INVALID")
-    // 1 is not array and other is array
-    if ([Array.isArray(data.port), Array.isArray(data.ip)].reduce((prev, a) => a === prev ? a : null) === null) throw new TypeError("OPTIONS_INVALID")
-    if (Array.isArray(data.ip) ? data.ip.length !== data.port.length : false) throw new RangeError("OPTIONS_LENGTH")
-    
+    if ("token" in data && (typeof data.token !== "string" && !(data.token instanceof Array) || !data.token.length)) throw new TypeError("OPTIONS_INVALID")
+    // 1 is not array and others are array, etc
+    if ([
+      Array.isArray(data.port), 
+      Array.isArray(data.ip), 
+      Array.isArray(data.token || data.ip) // if no token provided it dont matter
+    ].reduce((prev, a) => a === prev ? a : null) === null
+    ) throw new TypeError("OPTIONS_INVALID")
+    if (Array.isArray(data.ip) ? [data.ip.length, data.port.length, (data.token || data.ip).length].reduce((prev, a) => a === prev ? a : null) === null : false) throw new RangeError("OPTIONS_LENGTH")
     
     if ("messageCacheSize" in data && typeof data.messageCacheSize !== "number") throw new TypeError("OPTIONS_INVALID")
     
@@ -185,9 +214,11 @@ class Client extends EventEmitter {
       options[k] = data[k] == null ? defaultOptions[k] : data[k]
     }
     
-    if (![data.ip, data.port].every(Array.isArray)) Object.assign(options, {
-      ip: [data.ip].flat(),
-      port: [data.port].flat()
+    // didnt provide arrays
+    if (!Array.isArray(data.ip)) Object.assign(options, {
+      ip: [data.ip],
+      port: [data.port],
+      ...(data.token && { token: [data.token] })
     })
     
     console.log(options)

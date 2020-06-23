@@ -2,13 +2,16 @@ const { Client } = require("../src")
 
 const client = new Client({
   ip: "https://hub.termtalk.app",
-  port: 3000
+  port: 3000,
+  token: "886432345678"
 })
-
+console.log(client.options, Object.getOwnPropertyDescriptors(client.options));
+/*
 client.on("debug", console.log);
 client.on("ready", console.log.bind("I am ready!"));
-
+*/
 (async () => {
+  return;
   /*
   const { token } = await client.create({
     id: "TestBot2ElectricBungaloo",
