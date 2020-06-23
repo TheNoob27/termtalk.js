@@ -161,8 +161,8 @@ class Server extends Base {
     .on("msg", data => {
       this.client.emit("raw", data)
       if (data.server) return; // server message
-      const channel = this.channels.add({ name: data.channel })
-      data.channel = channel
+      const channel = data.channel !== "DM" ? this.channels.add({ name: data.channel }) : this.members.add({ id: data.userID }).dm
+      
       return this.client.emit("message", channel.messages.add(data))
     })
     
