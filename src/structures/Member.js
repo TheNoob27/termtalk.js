@@ -1,7 +1,10 @@
 const Base = require("./Base.js")
+let Channel;
 
 class Member extends Base {
   constructor(client, data, server) {
+    if (!Channel) Channel = require("../structures/Channel.js")
+    
     super(client)
     this.server = server
     this.dm = new Channel(client, { name: "DM" }, this)

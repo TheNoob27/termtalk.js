@@ -3,9 +3,6 @@ module.exports = {
   
   Client: require("./client/Client.js"),
   
-  Collection: require("./util/Collection.js"),
-  LimitedCollection: require("./util/LimitedCollection.js"),
-  
   Base: require("./structures/Base.js"),
   Channel: require("./structures/Channel.js"),
   Member: require("./structures/Member.js"),
@@ -17,4 +14,8 @@ module.exports = {
   MemberManager: require("./managers/MemberManager.js"),
   MessageManager: require("./managers/MessageManager.js"),
   ServerManager: require("./managers/ServerManager.js"),
+  
+  Collection: require("./util/Collection.js"),
+  LimitedCollection: require("./util/LimitedCollection.js"),
+  MessageCollector: require("./util/MessageCollector.js"),
 }

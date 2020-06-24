@@ -36,6 +36,7 @@ class Server extends Base {
     } else if (data.secure && typeof this.ip === "string" && !this.ip.startsWith("https")) {
       this.ip = `https://${this.ip.startsWith("http") ? this.ip.slice(7) : this.ip}`
     }
+    if (typeof this.ip !== "string") this.ip = ""
     
     if (data.port) this.port = data.port
 
@@ -109,7 +110,11 @@ class Server extends Base {
           return this.fetch().then(d => {
             this.load()
             .readyAt = Date.now()
-            if (this.client.servers.cache.every(g => g.ready)) this.client.emit("ready")
+            this.client.emit("debug", `Server ${this.id} is ready!`)
+            if (this.client.servers.cache.every(g => g.ready)) {
+              this.client.emit("debug", `Connected to all guilds. The client is ready.`)
+              this.client.emit("ready")
+            }
             return d
           }).then(resolve).catch(reject)
         })
@@ -130,13 +135,13 @@ class Server extends Base {
   async fetch() {
     this.client.emit("debug", `Fetching data from server ${this.id}.`)
     let ping = Date.now()
-     const data = {
-       ...(await this.api.ping.get()), // ping the server, we gonna override some of its data anyway
-       ping: Date.now() - ping,
-       channels: await this.api.channels.get().then(d => d.channels),
-       members: await this.api.members.get().then(d => d.members)
-     }
-     if (data.ip) delete data.ip
+    const data = {
+      ...(await this.api.ping.get()), // ping the server, we gonna override some of its data anyway
+      ping: Date.now() - ping,
+      channels: await this.api.channels.get().then(d => d.channels),
+      members: await this.api.members.get().then(d => d.members)
+    }
+    if (data.ip) delete data.ip
     
     this._patch(data)
     return this
@@ -187,11 +192,7 @@ class Server extends Base {
   }
 
   get secure() {
-    return this.name.startsWith("https")
-  }
-  
-  get name() {
-    return this.ip || ""
+    return this.ip.startsWith("https")
   }
 
   get api() {

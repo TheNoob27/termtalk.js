@@ -1,17 +1,16 @@
 const { Client } = require("../src")
 
 const client = new Client({
-  ip: "https://hub.termtalk.app",
-  port: 3000,
-  token: "886432345678"
+  ip: "localhost", //"https://hub.termtalk.app",
+  port: 5000, //3000,
+  token: require("./token")[0]
 })
-console.log(client.options, Object.getOwnPropertyDescriptors(client.options));
-/*
+
+
 client.on("debug", console.log);
 client.on("ready", console.log.bind("I am ready!"));
-*/
+
 (async () => {
-  return;
   /*
   const { token } = await client.create({
     id: "TestBot2ElectricBungaloo",
@@ -31,10 +30,8 @@ client.on("ready", console.log.bind("I am ready!"));
     port: 7500
   }, true)
   */
-  const [ token ] = require("./token.js") // pretend this is env lol
-  console.log(token)
 
-  await client.login(token) // or client.login(token (server.token))
+  await client.login() // or client.login(token (server.token))
   .then(server => {
     // server.channels.cache.first().send("Hello, i'm a bot")
     client.on("message", message => {

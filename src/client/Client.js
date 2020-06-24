@@ -186,7 +186,7 @@ class Client extends EventEmitter {
   
   parseOptions(data) {
     const defaultOptions = {
-      ip: ["localhost"], // lol ik you cant do public with this but thats their fault
+      ip: ["localhost"], // default to localhost if nothing specified
       port: [3000], // random port
       token: [],
       messageCacheSize: 30

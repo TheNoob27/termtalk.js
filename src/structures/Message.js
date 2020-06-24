@@ -1,7 +1,6 @@
 const Base = require("./Base.js")
 const { Error } = require("../errors")
 const MessageMentions = require("./MessageMentions.js")
-const Member = require("./Member.js")
 
 class Message extends Base {
   constructor(client, data, channel) {
@@ -13,6 +12,8 @@ class Message extends Base {
   }
   
   get server() {
+    console.log(this.channel.server)
+    console.log(Member)
     return this.channel.server instanceof Member ? this.channel.server.server : this.channel.server
   }
   
@@ -47,3 +48,5 @@ class Message extends Base {
 }
 
 module.exports = Message
+const Member = require("./Member.js")
+console.log(Member, require("./Member.js"), require("./Channel"), MessageMentions)

@@ -37,7 +37,7 @@ module.exports = function createRoute(manager) {
         return (options) => manager.request({
           path: route.map(encodeURIComponent).join("/"),
           method: name.toUpperCase(),
-          hostname: route.server ? route.server.name.slice(route.server.secure ? 8 : 7) || null : null,
+          hostname: route.server ? route.server.ip.slice(route.server.secure ? 8 : 7) || null : null,
           port: route.server ? route.server.port || 3000 : 3000,
           server: route.server
         }, options)
