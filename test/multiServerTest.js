@@ -13,8 +13,6 @@ client.on("debug", console.log).on("ready", () => console.log("I am ready!!!!!!!
   await client.login()
 
   client.on("message", message => {
-    console.log(message)
-
     if (!message.author || message.author.username !== "TheNoob27") return;
 
     if (message.content.toLowerCase().startsWith("eval ")) {

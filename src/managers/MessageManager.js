@@ -5,7 +5,6 @@ const LC = require("../util/LimitedCollection.js")
 class MessageManager extends BaseManager {
   constructor(channel) {
     super(channel.client, Message, null, LC, channel.client.options.messageCacheSize || 30)
-    
     this.channel = channel
   }
   

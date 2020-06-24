@@ -10,7 +10,7 @@ class ChannelManager extends BaseManager {
   }
   
   add(data, { cache, id } = {}) {
-    return super.add(data, { cache, id, extras: [this.server] })
+    return super.add(data, { cache, id: data.name, extras: [this.server] })
   }
   
   resolve(data) {

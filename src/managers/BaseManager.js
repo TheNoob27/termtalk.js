@@ -8,7 +8,7 @@ class BaseManager {
     })
     
     this.cache = new Cache(...options)
-    if (data) for (const d of data) this.add(d, console.log("adding: "), console.log(d))
+    if (data) for (const d of data) this.add(d)
   }
   
   add(data, { id, cache = true, extras = [] } = {}) {

@@ -106,18 +106,16 @@ class Client extends EventEmitter {
     if (!ip || !port) {
       if (this.servers.cache.size) {
         let available = this.servers.cache.find(s => !s.ready && s.ip)
-        if (available) console.log("available: ", available.id) || ({ ip = ip , port = port } = available)
+        if (available) ({ ip = ip , port = port } = available)
       } // no available vvv
       if ((!ip || !port) && this.options.ip.length) [ [ip = ip], [port = port] ] = [this.options.ip, this.options.port]
     }
-    console.log("ip, port:", ip, port)
     
     const data = [id, username, tag, ownerID, ownerPassword, ip, port]
     if (data.some(i => !i)) return Promise.reject(new Error("BOT_CREATE_INFO"))
     if (data.slice(0, -1).some(i => typeof i !== "string") || typeof port !== "number") return Promise.reject(new TypeError("BOT_CREATE_TYPE"))
     
     const server = this.servers.add({ ip, port })
-    console.log("creatbit", server.id)
     this.emit("debug", `Created a server. IP: ${ip}, Port: ${port}. Creating bot now...`)
 
     return this.api.server(server).bots.create.post({
@@ -163,8 +161,6 @@ class Client extends EventEmitter {
       let available = this.servers.cache.find(s => !s.ready && s.ip)
       if (available) ({ ip, port, token = token} = available)
     }
-
-    //console.log(ip, port, token, this.servers.cache)
 
     if (!server && !(ip || port)) return Promise.reject(new Error("INVALID_TOKEN"))
     if (!server && ip) server = this.servers.cache.find(s => s.ip === ip)
@@ -220,8 +216,7 @@ class Client extends EventEmitter {
       port: [data.port],
       ...(data.token && { token: [data.token] })
     })
-    
-    console.log(options)
+
     return options
   }
   
